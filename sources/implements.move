@@ -132,6 +132,30 @@ module swap::implements {
         bag::contains_with_type<String, Pool<X, Y>>(&global.pools, lp_name)
     }
 
+    public fun pool_exists<X, Y>(
+        global: &Global
+    ): bool {
+        let is_order = is_order<X, Y>();
+        if (!is_order) {
+            return false
+        };
+        has_registered<X, Y>(global)
+    }
+
+    public fun get_pool_reserves<X, Y>(
+        global: &Global
+    ): (u64, u64, u64) {
+        let is_order = is_order<X, Y>();
+        assert!(is_order, ERR_MUST_BE_ORDER);
+
+        let lp_name = generate_lp_name<X, Y>();
+        let has_registered = bag::contains_with_type<String, Pool<X, Y>>(&global.pools, lp_name);
+        assert!(has_registered, ERR_POOL_NOT_REGISTER);
+
+        let pool = bag::borrow<String, Pool<X, Y>>(&global.pools, lp_name);
+        get_reserves_size(pool)
+    }
+
     public(friend) fun pause(global: &mut Global) {
         global.has_paused = true
     }
