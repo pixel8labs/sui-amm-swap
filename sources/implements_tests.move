@@ -555,6 +555,137 @@ module swap::implements_tests {
     }
 
     // utilities
+    #[test]
+    fun test_pool_exists() {
+        let scenario = scenario();
+        test_pool_exists_(&mut scenario);
+        end(scenario);
+    }
+
+    #[test]
+    fun test_get_pool_reserves() {
+        let scenario = scenario();
+        test_get_pool_reserves_(&mut scenario);
+        end(scenario);
+    }
+
+    fun test_pool_exists_(test: &mut Scenario) {
+        let (owner, _) = people();
+
+        next_tx(test, owner);
+        {
+            implements::init_for_testing(ctx(test));
+        };
+
+        next_tx(test, owner);
+        {
+            let global = test_scenario::take_shared<Global>(test);
+            
+            assert!(!implements::pool_exists<USDT, XBTC>(&global), 1);
+            assert!(!implements::pool_exists<XBTC, USDT>(&global), 2);
+            
+            test_scenario::return_shared(global)
+        };
+
+        // Add liquidity to create the pool
+        next_tx(test, owner);
+        {
+            let global = test_scenario::take_shared<Global>(test);
+
+            let (lp, _pool_id) = implements::add_liquidity_for_testing<USDT, XBTC>(
+                &mut global,
+                mint<USDT>(USDT_AMOUNT, ctx(test)),
+                mint<XBTC>(XBTC_AMOUNT, ctx(test)),
+                ctx(test)
+            );
+
+            burn(lp);
+            test_scenario::return_shared(global)
+        };
+
+        next_tx(test, owner);
+        {
+            let global = test_scenario::take_shared<Global>(test);
+            
+            assert!(implements::pool_exists<USDT, XBTC>(&global), 3);
+            assert!(implements::pool_exists<XBTC, USDT>(&global), 4);
+            
+            assert!(!implements::pool_exists<SUI, BEEP>(&global), 5);
+            
+            test_scenario::return_shared(global)
+        };
+    }
+
+    fun test_get_pool_reserves_(test: &mut Scenario) {
+        let (owner, _) = people();
+
+        next_tx(test, owner);
+        {
+            implements::init_for_testing(ctx(test));
+        };
+
+        next_tx(test, owner);
+        {
+            let global = test_scenario::take_shared<Global>(test);
+
+            let (lp, _pool_id) = implements::add_liquidity_for_testing<USDT, XBTC>(
+                &mut global,
+                mint<USDT>(USDT_AMOUNT, ctx(test)),
+                mint<XBTC>(XBTC_AMOUNT, ctx(test)),
+                ctx(test)
+            );
+
+            burn(lp);
+            test_scenario::return_shared(global)
+        };
+
+        next_tx(test, owner);
+        {
+            let global = test_scenario::take_shared<Global>(test);
+            
+            let (reserve_usdt, reserve_xbtc, lp_supply) = implements::get_pool_reserves<USDT, XBTC>(&global);
+            
+            assert!(reserve_usdt == USDT_AMOUNT, 1);
+            assert!(reserve_xbtc == XBTC_AMOUNT, 2);
+            
+            let expected_lp = sqrt(mul_to_u128(USDT_AMOUNT, XBTC_AMOUNT));
+            assert!(lp_supply == expected_lp, 3);
+            
+            test_scenario::return_shared(global)
+        };
+
+        // Test that reserves update after adding more liquidity
+        next_tx(test, owner);
+        {
+            let global = test_scenario::take_shared<Global>(test);
+
+            let (lp, _pool_id) = implements::add_liquidity_for_testing<USDT, XBTC>(
+                &mut global,
+                mint<USDT>(USDT_AMOUNT / 2, ctx(test)),
+                mint<XBTC>(XBTC_AMOUNT / 2, ctx(test)),
+                ctx(test)
+            );
+
+            burn(lp);
+            test_scenario::return_shared(global)
+        };
+
+        // Verify reserves increased
+        next_tx(test, owner);
+        {
+            let global = test_scenario::take_shared<Global>(test);
+            
+            let (reserve_usdt, reserve_xbtc, lp_supply) = implements::get_pool_reserves<USDT, XBTC>(&global);
+            
+            assert!(reserve_usdt == USDT_AMOUNT + USDT_AMOUNT / 2, 4);
+            assert!(reserve_xbtc == XBTC_AMOUNT + XBTC_AMOUNT / 2, 5);
+            
+            assert!(lp_supply > sqrt(mul_to_u128(USDT_AMOUNT, XBTC_AMOUNT)), 6);
+            
+            test_scenario::return_shared(global)
+        };
+    }
+
     fun scenario(): Scenario { test_scenario::begin(@0x1) }
 
     fun people(): (address, address) { (@0xBEEF, @0x1337) }

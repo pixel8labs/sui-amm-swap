@@ -136,10 +136,11 @@ module swap::implements {
         global: &Global
     ): bool {
         let is_order = is_order<X, Y>();
-        if (!is_order) {
-            return false
-        };
-        has_registered<X, Y>(global)
+        if (is_order) {
+            has_registered<X, Y>(global)
+        } else {
+            has_registered<Y, X>(global)
+        }
     }
 
     public fun get_pool_reserves<X, Y>(
