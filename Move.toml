@@ -16,3 +16,5 @@ beneficiary = "0xd5780ffbf267242c899ac04f9300fa4e6506bc338f671076727d4e32cd1a8f8
 
 [environments]
 devnet = "a9149565"
+testnet = "4c78adac"
+mainnet = "35834a8a"

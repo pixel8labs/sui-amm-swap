@@ -12,3 +12,5 @@ test = "0x0"
 
 [environments]
 devnet = "a9149565"
+testnet = "4c78adac"
+mainnet = "35834a8a"

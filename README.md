@@ -55,6 +55,8 @@ Audit report click [here](<https://github.com/OmniBTC/Sui-AMM-swap/blob/main/Sui
 
    [environments]
    devnet = "a9149565"
+   testnet = "4c78adac"
+   mainnet = "35834a8a"
    ```
 
    If the `[environments]` section is missing, add it to both `Move.toml` and `test_coins/Move.toml`.
@@ -88,8 +90,11 @@ cd ..
 Run unit tests locally (no deployment needed):
 
 ```bash
-sui move test
+# Tests must be run with testnet environment
+sui move test --environment testnet
 ```
+
+**Note:** Unit tests don't require network access, but Sui requires an environment to be specified. Use `testnet` for running tests.
 
 ### Deploying
 
