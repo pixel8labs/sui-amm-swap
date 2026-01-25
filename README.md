@@ -37,7 +37,15 @@ Audit report click [here](<https://github.com/OmniBTC/Sui-AMM-swap/blob/main/Sui
    sui client switch --env devnet
    ```
 
-3. **Verify Move.toml configuration**
+3. **Check your active address**
+
+   ```bash
+   sui client active-address
+   ```
+
+   Save this address - you'll need it for getting test tokens from the faucet.
+
+4. **Verify Move.toml configuration**
 
    The `Move.toml` file should already have the correct dependencies:
 
@@ -51,7 +59,7 @@ Audit report click [here](<https://github.com/OmniBTC/Sui-AMM-swap/blob/main/Sui
 
    If the `[environments]` section is missing, add it to both `Move.toml` and `test_coins/Move.toml`.
 
-4. **Get SUI tokens for gas (devnet)**
+5. **Get SUI tokens for gas (devnet)**
    ```bash
    sui client faucet
    sui client gas  # Verify you received tokens
@@ -194,8 +202,4 @@ sui client call --gas-budget 10000000 \
   --function=add_liquidity \
   --args $global $out_sui_coin 100 $new_usdt_coin 1000 \
   --type-args $SUI $USDT
-```
-
-```
-
 ```
