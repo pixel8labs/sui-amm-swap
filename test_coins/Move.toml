@@ -5,7 +5,8 @@ version = "1.0.0"
 [dependencies]
 Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "devnet" }
 # Sui = { local = "../../sui/crates/sui-framework/packages/sui-framework" }
-swap = { local = "../" }
+# Use your deployed swap package (same network as test_coins)
+swap = { local = "../", published-at = "0xfffdf97b2cbfd61f4ca64d5f9d7bf38457884f7cdde064c4eeba92d27e3e839c" }
 
 [addresses]
 test = "0x0"

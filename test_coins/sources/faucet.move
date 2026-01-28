@@ -29,7 +29,7 @@ module test::faucet {
     fun init(
         ctx: &mut TxContext
     ) {
-        let admin = @0xc05eaaf1369ece51ce0b8ad5cb797b737d4f2eba;
+        let admin = @0xc889154ea233fa1a987436a88fb76c3de1182c0b5fcb72b5275cb96f9de4c794;
         let admins = vec_set::empty<address>();
         vec_set::insert(&mut admins, admin);
 
