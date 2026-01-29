@@ -1,9 +1,7 @@
-# Sui-AMM-swap
-
-The first open source AMM swap on the [Sui](https://github.com/MystenLabs).
+# SUI AMM DEX 
 
 - **Technical docs:** [DOCUMENTATION.md](./DOCUMENTATION.md) — functions, modules, math, architecture
-- **Test coins:** [test_coins/README.md](./test_coins/README.md) — faucet, minting, bootstrap liquidity
+- **Test coins docs:** [test_coins/README.md](./test_coins/README.md) — faucet, minting, bootstrap liquidity
 - **Audit:** [Sui-AMM-swap Contracts Audit Report](https://movebit.xyz/file/Sui-AMM-swap-Contracts-Audit-Report.pdf)
 
 This code has been audited by MoveBit professional auditing company.
