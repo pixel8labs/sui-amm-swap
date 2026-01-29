@@ -2,7 +2,9 @@
 
 The first open source AMM swap on the [Sui](https://github.com/MystenLabs).
 
-## [Audit Report](https://movebit.xyz/file/Sui-AMM-swap-Contracts-Audit-Report.pdf)
+- **Technical docs:** [DOCUMENTATION.md](./DOCUMENTATION.md) — functions, modules, math, architecture
+- **Test coins:** [test_coins/README.md](./test_coins/README.md) — faucet, minting, bootstrap liquidity
+- **Audit:** [Sui-AMM-swap Contracts Audit Report](https://movebit.xyz/file/Sui-AMM-swap-Contracts-Audit-Report.pdf)
 
 This code has been audited by MoveBit professional auditing company.
 Audit report click [here](<https://github.com/OmniBTC/Sui-AMM-swap/blob/main/Sui-AMM-swap%20Contracts%20Audit%20Report%20(5).pdf>)
@@ -98,7 +100,9 @@ sui move test --environment testnet
 
 ### Deploying
 
-**Deploy to devnet:**
+**Deployment order:** Deploy the swap contract first. If you use `test_coins`, deploy that second and update `test_coins/Move.toml` with the swap package ID. See [test_coins/README.md](test_coins/README.md).
+
+**Deploy swap to devnet:**
 
 ```bash
 sui client test-publish --gas-budget 10000000 --build-env devnet
@@ -207,4 +211,100 @@ sui client call --gas-budget 10000000 \
   --function=add_liquidity \
   --args $global $out_sui_coin 100 $new_usdt_coin 1000 \
   --type-args $SUI $USDT
+```
+
+---
+
+## Commands Reference
+
+### Utility Commands
+
+```bash
+# List your objects (coins, LP tokens, etc.)
+sui client objects
+
+# Check gas balance
+sui client gas
+
+# Get SUI for gas (devnet)
+sui client faucet
+
+# Switch network (devnet / testnet / mainnet)
+sui client switch --env devnet
+
+# Show active address
+sui client active-address
+
+# Split a coin into smaller amounts
+sui client split-coin --gas-budget 10000000 --coin-id $COIN_ID --amounts 100 200 500
+
+# Merge coins (combine multiple coins of same type)
+sui client merge-coin --gas-budget 10000000 --primary-coin $COIN1 --coin-to-merge $COIN2
+```
+
+### Swap Contract — User Entrypoints
+
+```bash
+# Add liquidity (creates pool if first time)
+sui client call --gas-budget 10000000 --package $PKG --module interface --function add_liquidity \
+  --args $global $coin_x $coin_x_min $coin_y $coin_y_min --type-args $X $Y
+
+# Remove liquidity
+sui client call --gas-budget 10000000 --package $PKG --module interface --function remove_liquidity \
+  --args $global $lp_coin --type-args $X $Y
+
+# Swap X → Y
+sui client call --gas-budget 10000000 --package $PKG --module interface --function swap \
+  --args $global $coin_in $coin_out_min --type-args $X $Y
+
+# Multi-coin variants (merge multiple coins first, then call)
+# Note: multi_* functions take vector<Coin> args; use merge-coin or SDK to prepare
+sui client call --gas-budget 10000000 --package $PKG --module interface --function multi_add_liquidity \
+  --args $global $coins_x $coins_x_value $coin_x_min $coins_y $coins_y_value $coin_y_min --type-args $X $Y
+
+sui client call --gas-budget 10000000 --package $PKG --module interface --function multi_remove_liquidity \
+  --args $global $lp_coins --type-args $X $Y
+
+sui client call --gas-budget 10000000 --package $PKG --module interface --function multi_swap \
+  --args $global $coins_in $coins_in_value $coin_out_min --type-args $X $Y
+```
+
+### Swap Contract — Admin (Controller)
+
+```bash
+# Pause all operations (emergency)
+sui client call --gas-budget 10000000 --package $PKG --module controller --function pause \
+  --args $global
+
+# Resume operations
+sui client call --gas-budget 10000000 --package $PKG --module controller --function resume \
+  --args $global
+
+# Transfer controller to new address
+sui client call --gas-budget 10000000 --package $PKG --module controller --function modify_controller \
+  --args $global $NEW_CONTROLLER_ADDRESS
+```
+
+### Swap Contract — Admin (Beneficiary)
+
+```bash
+# Withdraw accumulated fees from pool X-Y to beneficiary
+sui client call --gas-budget 10000000 --package $PKG --module beneficiary --function withdraw \
+  --args $global --type-args $X $Y
+```
+
+### Build & Test
+
+```bash
+# Build main swap (no publish)
+sui move build --environment devnet
+
+# Run unit tests
+sui move test --environment testnet
+
+# Deploy swap to devnet (save package + global IDs)
+sui client test-publish --gas-budget 10000000 --build-env devnet
+
+# Deploy for production (creates Publications.toml)
+sui client publish --gas-budget 10000000
 ```
